@@ -9,9 +9,9 @@ var passport = require("passport");
 var BearerStrategy = require('passport-azure-ad').BearerStrategy;
 
 // TODO: Update the first 3 variables
-var tenantID = "fabrikamb2c.onmicrosoft.com";
-var clientID = "25eef6e4-c905-4a07-8eb4-0d08d5df8b3f";
-var policyName = "B2C_1_SUSI";
+var tenantID = "hhalimb2c.onmicrosoft.com";
+var clientID = "e4b12ff5-2e83-4344-a378-845d9f195d9e";
+var policyName = "B2C_1_hhb2c_policy1";
 
 var options = {
     identityMetadata: "https://login.microsoftonline.com/" + tenantID + "/v2.0/.well-known/openid-configuration/",
