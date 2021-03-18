@@ -1,10 +1,10 @@
 {
     "credentials": {
-        "tenantName": "fabrikamb2c",
-        "clientID": "93733604-cc77-4a3c-a604-87084dd55348"
+        "tenantName": "ah3555b2ctest",
+        "clientID": "9dd856f1-dd4d-46cc-80d7-298c683c893e"
     },
     "policies": {
-        "policyName": "B2C_1_SUSI"
+        "policyName": "B2C_1_signup_signin"
     },
     "resource": {
         "scope": ["demo.read"]
