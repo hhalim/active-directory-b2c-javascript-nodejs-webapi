@@ -1,65 +1,55 @@
-// Authors:
-// Shane Oatman https://github.com/shoatman
-// Sunil Bandla https://github.com/sunilbandla
-// Daniel Dobalian https://github.com/danieldobalian
+const express = require('express');
+const morgan = require('morgan');
+const passport = require('passport');
+const config = require('./config.json');
 
-var express = require("express");
-var morgan = require("morgan");
-var passport = require("passport");
-var BearerStrategy = require('passport-azure-ad').BearerStrategy;
+const BearerStrategy = require('passport-azure-ad').BearerStrategy;
 
-// TODO: Update the first 3 variables
-var tenantID = "hhalimb2c.onmicrosoft.com";
-var clientID = "e4b12ff5-2e83-4344-a378-845d9f195d9e";
-var policyName = "B2C_1_hhb2c_policy1";
+const options = {
+    identityMetadata: `https://${config.credentials.tenantName}.b2clogin.com/${config.credentials.tenantName}.onmicrosoft.com/${config.policies.policyName}/${config.metadata.version}/${config.metadata.discovery}`,
+    clientID: config.credentials.clientID,
+    audience: config.credentials.clientID,
+    policyName: config.policies.policyName,
+    isB2C: config.settings.isB2C,
+    validateIssuer: config.settings.validateIssuer,
+    loggingLevel: config.settings.loggingLevel,
+    passReqToCallback: config.settings.passReqToCallback
+}
 
-var options = {
-    identityMetadata: "https://login.microsoftonline.com/" + tenantID + "/v2.0/.well-known/openid-configuration/",
-    clientID: clientID,
-    policyName: policyName,
-    isB2C: true,
-    validateIssuer: true,
-    loggingLevel: 'info',
-    passReqToCallback: false
-};
-
-var bearerStrategy = new BearerStrategy(options,
-    function (token, done) {
+const bearerStrategy = new BearerStrategy(options, (token, done) => {
         // Send user info using the second argument
-        done(null, {}, token);
+        done(null, { }, token);
     }
 );
 
-var app = express();
+const app = express();
+
 app.use(morgan('dev'));
 
 app.use(passport.initialize());
+
 passport.use(bearerStrategy);
 
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Authorization, Origin, X-Requested-With, Content-Type, Accept");
+//enable CORS (for testing only -remove in production/deployment)
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Authorization, Origin, X-Requested-With, Content-Type, Accept');
     next();
 });
 
-app.get("/hello",
+// API endpoint
+app.get('/hello',
     passport.authenticate('oauth-bearer', {session: false}),
-    function (req, res) {
-        var claims = req.authInfo;
-        console.log('User info: ', req.user);
-        console.log('Validated claims: ', claims);
+    (req, res) => {
+        console.log('Validated claims: ', req.authInfo);
         
-        if (claims['scp'].split(" ").indexOf("demo.read") >= 0) {
-            // Service relies on the name claim.  
-            res.status(200).json({'name': claims['name']});
-        } else {
-            console.log("Invalid Scope, 403");
-            res.status(403).json({'error': 'insufficient_scope'}); 
-        }
+        // Service relies on the name claim.  
+        res.status(200).json({'name': req.authInfo['name']});
     }
 );
 
-var port = process.env.PORT || 5000;
-app.listen(port, function () {
-    console.log("Listening on port " + port);
+const port = process.env.PORT || 5000;
+
+app.listen(port, () => {
+    console.log('Listening on port ' + port);
 });
